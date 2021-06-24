@@ -14,10 +14,10 @@ class Automaat:
         self.toestanden = Automaat.toestanden(self,toestanden)
         self.randvoorwaarden = Automaat.randvoorwaarden(self,randvoorwaarden)
 
-    def rooster(self, dim, n): 
+    def rooster(self, dim, omvang): 
         '''maakt een rooster van lengte n in een gespecificeerde dimensie'''
-        vorm = tuple(n for i in range(dim))
-        return np.zeros(vorm)
+        vorm = tuple(omvang for i in range(dim))
+        return np.zeros(vorm, dtype = int)
 
     def toestanden(self, m): #toestand van een cel, m mogelijkheden
         return [i for i in range(m)]
