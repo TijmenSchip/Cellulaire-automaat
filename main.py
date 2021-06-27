@@ -43,11 +43,10 @@ class eendimensionale_CA(Automaat):
         return res #periodiek
         
     def update_bord(self):
-        nieuw_rooster = self.rooster
+        nieuw_rooster = [0 for i in range(self.omvang)]
         regels = eendimensionale_CA.regels(self,self.regelnummer)
         for i in range(self.omvang):
             omgeving = eendimensionale_CA.krijg_omgeving(self,i)
-            print(omgeving)
             nieuw_rooster[i] = regels[omgeving]
         self.rooster = nieuw_rooster
 
@@ -58,8 +57,7 @@ while True:
     a_30.update_bord()
     print(a_30.rooster)
     time.sleep(0.5)
-    break
-
+#%%
 
 class tweedimensionale_CA(Automaat):
     def regels(self,regelnummer):
@@ -74,13 +72,15 @@ class tweedimensionale_CA(Automaat):
         return 0
     
     def krijg_omgeving(self, r, c):
-        res1 = str(self.rooster[r-1][c-1]) + str(self.rooster[r-1][c]) + str(self.rooster[r-1][(c+1)%len(self.rooster)])
-        res2 = str(self.rooster[r][c-1]) + str(self.rooster[r][c]) + str(self.rooster[r][(c+1)%len(self.rooster)])
-        res3 = str(self.rooster[(r+1)%len(self.rooster)][c-1]) + str(self.rooster[(r+1)%len(self.rooster)][c]) + str(self.rooster[(r+1)%len(self.rooster)][(c+1)%len(self.rooster)])
+        res1 = str(self.rooster[r-1][c-1]) + str(self.rooster[r-1][c]) + str(self.rooster[r-1][(c+1)%self.omvang])
+        res2 = str(self.rooster[r][c-1]) + str(self.rooster[r][c]) + str(self.rooster[r][(c+1)%self.omvang])
+        res3 = str(self.rooster[(r+1)%self.omvang][c-1]) + str(self.rooster[(r+1)%self.omvang][c]) + str(self.rooster[(r+1)%self.omvang][(c+1)%self.omvang])
         return res1 + res2 + res3 #periodiek
         
     def update_bord(self):
-        nieuw_rooster = self.rooster
+        nieuw_rooster = []
+        for i in range(self.omvang):
+            nieuw_rooster.append([0 for j in range(self.omvang)])
         regels = tweedimensionale_CA.regels(self,self.regelnummer) #regels moeten eigenlijk in de init al gedaan worden
         for rij in range(self.omvang):
             for kolom in range(self.omvang):
@@ -96,8 +96,8 @@ class tweedimensionale_CA(Automaat):
         return res
 
 
-#%%Tweedimensionale test
-a_100 = tweedimensionale_CA(2,10,2,0,47634829485252037513200973884082471888288955642325528262910887637847274372981720534370017768342996036219492316860704401273651054628223608960)
+#Tweedimensionale test
+a_100 = tweedimensionale_CA(2,10,2,0,23817414742626018756600486942041235944144477821162764131455443818923637186490860267185008884171498018109746158430352200636825527314111804480)
 a_100.rooster = [[0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
                  [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
                  [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
@@ -108,11 +108,8 @@ a_100.rooster = [[0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
                  [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
                  [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
                  [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]]
-print(a_100.rooster)
+print(a_100)
 while True:
     a_100.update_bord()
     print(a_100)
     time.sleep(0.5)
-
-    
-
