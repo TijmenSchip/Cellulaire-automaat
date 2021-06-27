@@ -25,6 +25,6 @@ for i in omgevingen:
 regelnummer = 0
 for i in range(512):
     binair = format(i, 'b').zfill(9)
+    print(binair)
     if regelset[binair] == 1:
-        regelnummer+=2**(i-1)
-
+        regelnummer+=2**(511-i)
