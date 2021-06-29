@@ -8,15 +8,16 @@ class Automaat:
     
     '''Te doen: cellen maken, regels maken'''
     
-    def __init__(self, dimensies, omvang, toestanden, randvoorwaarden, regelnummer):
+    def __init__(self, dimensies, omvang, toestanden, randvoorwaarde, regelnummer):
         self.omvang = omvang
         self.rooster = Automaat.rooster(self,dimensies,omvang)
         self.toestanden = Automaat.toestanden(self,toestanden)
         self.regelnummer = regelnummer
+        self.randvoorwaarde = randvoorwaarde
     
-    def rooster(self, dim, omvang): 
+    def rooster(self, dimensies, omvang): 
         '''maakt een rooster van lengte n in een gespecificeerde dimensie'''
-        vorm = tuple(omvang for i in range(dim))
+        vorm = tuple(omvang for i in range(dimensies))
         #hier misschien nog een functie die de grid willekeurig vult met
         #nullen en enen, of om een input vraagt vanuit de user
         return np.zeros(vorm,dtype=int)
@@ -37,11 +38,30 @@ class eendimensionale_CA(Automaat):
                "001": binair[6], "000": binair[7]}
         return res
     
-    def randvoorwaarden(self):
-        return 0
-    
     def krijg_omgeving(self, i):
-        res = str(self.rooster[i-1]) + str(self.rooster[i]) + str(self.rooster[(i+1)%self.omvang])
+        if self.randvoorwaarde == 'periodiek':
+            res = str(self.rooster[i-1]) + str(self.rooster[i]) + str(self.rooster[(i+1)%self.omvang])
+        if self.randvoorwaarde == 'Dirichlet0':
+            if i == 0:
+                res = '0' + str(self.rooster[i]) + str(self.rooster[(i+1)%self.omvang])
+            elif i == self.omvang - 1:
+                res = str(self.rooster[i-1]) + str(self.rooster[i]) + '0'
+            else:
+                res = str(self.rooster[i-1]) + str(self.rooster[i]) + str(self.rooster[(i+1)%self.omvang])
+        if self.randvoorwaarde == 'Dirichlet1':
+            if i == 0:
+                res = '1' + str(self.rooster[i]) + str(self.rooster[(i+1)%self.omvang])
+            elif i == self.omvang - 1:
+                res = str(self.rooster[i-1]) + str(self.rooster[i]) + '1'
+            else:
+                res = str(self.rooster[i-1]) + str(self.rooster[i]) + str(self.rooster[(i+1)%self.omvang])
+        if self.randvoorwaarde == 'Neumann':
+            if i == 0:
+                res = str(self.rooster[i]) + str(self.rooster[i]) + str(self.rooster[(i+1)%self.omvang])
+            elif i == self.omvang - 1:
+                res = str(self.rooster[i-1]) + str(self.rooster[i]) + str(self.rooster[(i+1)%self.omvang])
+            else:
+                res = str(self.rooster[i-1]) + str(self.rooster[i]) + str(self.rooster[(i+1)%self.omvang])
         return res #periodiek
         
     def update_bord(self):
@@ -121,10 +141,89 @@ class tweedimensionale_CA(Automaat):
         return 0
     
     def krijg_omgeving(self, r, c):
-        res1 = str(self.rooster[r-1][c-1]) + str(self.rooster[r-1][c]) + str(self.rooster[r-1][(c+1)%self.omvang])
-        res2 = str(self.rooster[r][c-1]) + str(self.rooster[r][c]) + str(self.rooster[r][(c+1)%self.omvang])
-        res3 = str(self.rooster[(r+1)%self.omvang][c-1]) + str(self.rooster[(r+1)%self.omvang][c]) + str(self.rooster[(r+1)%self.omvang][(c+1)%self.omvang])
-        return res1 + res2 + res3 #periodiek
+        if self.randvoorwaarde == 'periodiek':
+            res1 = str(self.rooster[r-1][c-1]) + str(self.rooster[r-1][c]) + str(self.rooster[r-1][(c+1)%self.omvang])
+            res2 = str(self.rooster[r][c-1]) + str(self.rooster[r][c]) + str(self.rooster[r][(c+1)%self.omvang])
+            res3 = str(self.rooster[(r+1)%self.omvang][c-1]) + str(self.rooster[(r+1)%self.omvang][c]) + str(self.rooster[(r+1)%self.omvang][(c+1)%self.omvang])
+        if self.randvoorwaarde == 'Dirichlet0':
+            if r == 0:
+                if c == 0:
+                    res1 = '000'
+                    res2 = '0' + str(self.rooster[r][c]) + str(self.rooster[r][(c+1)])
+                    res3 = '0' + str(self.rooster[(r+1)][c]) + str(self.rooster[(r+1)][(c+1)])
+                elif c == self.omvang - 1:
+                    res1 = '000'
+                    res2 = str(self.rooster[r][c-1]) + str(self.rooster[r][c]) + '0'
+                    res3 = str(self.rooster[(r+1)][c-1]) + str(self.rooster[(r+1)][c]) + '0'
+                else:
+                    res1 = '000'
+                    res2 = str(self.rooster[r][c-1]) + str(self.rooster[r][c]) + str(self.rooster[r][(c+1)])
+                    res3 = str(self.rooster[(r+1)][c-1]) + str(self.rooster[(r+1)][c]) + str(self.rooster[(r+1)][(c+1)])
+            elif r == self.omvang - 1:
+                if c == 0:
+                    res1 =  '0' + str(self.rooster[r-1][c]) + str(self.rooster[r-1][(c+1)])
+                    res2 = '0' + str(self.rooster[r][c]) + str(self.rooster[r][(c+1)])
+                    res3 = '000'
+                elif c == self.omvang -1:
+                    res1 = str(self.rooster[r-1][c-1]) + str(self.rooster[r-1][c]) + '0'
+                    res2 = str(self.rooster[r][c-1]) + str(self.rooster[r][c]) + '0'
+                    res3 = '000'
+                else:
+                    res1 = str(self.rooster[r-1][c-1]) + str(self.rooster[r-1][c]) + str(self.rooster[r-1][(c+1)])
+                    res2 = str(self.rooster[r][c-1]) + str(self.rooster[r][c]) + str(self.rooster[r][(c+1)])
+                    res3 = '000'
+            elif c == 0:
+                res1 = '0' + str(self.rooster[r-1][c]) + str(self.rooster[r-1][(c+1)])
+                res2 = '0' + str(self.rooster[r][c]) + str(self.rooster[r][(c+1)])
+                res3 = '0' + str(self.rooster[(r+1)%self.omvang][c]) + str(self.rooster[(r+1)][(c+1)])
+            elif c == self.omvang - 1:
+                res1 = str(self.rooster[r-1][c-1]) + str(self.rooster[r-1][c]) + '0'
+                res2 = str(self.rooster[r][c-1]) + str(self.rooster[r][c]) + '0'
+                res3 = str(self.rooster[(r+1)][c-1]) + str(self.rooster[(r+1)][c]) + '0'
+            else:
+                res1 = str(self.rooster[r-1][c-1]) + str(self.rooster[r-1][c]) + str(self.rooster[r-1][(c+1)])
+                res2 = str(self.rooster[r][c-1]) + str(self.rooster[r][c]) + str(self.rooster[r][(c+1)])
+                res3 = str(self.rooster[(r+1)][c-1]) + str(self.rooster[(r+1)][c]) + str(self.rooster[(r+1)][(c+1)])
+        if self.randvoorwaarde == 'Dirichlet1':
+            if r == 0:
+                if c == 0:
+                    res1 = '111'
+                    res2 = '1' + str(self.rooster[r][c]) + str(self.rooster[r][(c+1)])
+                    res3 = '1' + str(self.rooster[(r+1)][c]) + str(self.rooster[(r+1)][(c+1)])
+                elif c == self.omvang - 1:
+                    res1 = '111'
+                    res2 = str(self.rooster[r][c-1]) + str(self.rooster[r][c]) + '1'
+                    res3 = str(self.rooster[(r+1)][c-1]) + str(self.rooster[(r+1)][c]) + '1'
+                else:
+                    res1 = '111'
+                    res2 = str(self.rooster[r][c-1]) + str(self.rooster[r][c]) + str(self.rooster[r][(c+1)])
+                    res3 = str(self.rooster[(r+1)][c-1]) + str(self.rooster[(r+1)][c]) + str(self.rooster[(r+1)][(c+1)])
+            elif r == self.omvang - 1:
+                if c == 0:
+                    res1 = '1' + str(self.rooster[r-1][c]) + str(self.rooster[r-1][(c+1)])
+                    res2 = '1' + str(self.rooster[r][c]) + str(self.rooster[r][(c+1)])
+                    res3 = '111'
+                elif c == self.omvang -1:
+                    res1 = str(self.rooster[r-1][c-1]) + str(self.rooster[r-1][c]) + '1'
+                    res2 = str(self.rooster[r][c-1]) + str(self.rooster[r][c]) + '1'
+                    res3 = '111'
+                else:
+                    res1 = str(self.rooster[r-1][c-1]) + str(self.rooster[r-1][c]) + str(self.rooster[r-1][(c+1)])
+                    res2 = str(self.rooster[r][c-1]) + str(self.rooster[r][c]) + str(self.rooster[r][(c+1)])
+                    res3 = '111'
+            elif c == 0:
+                res1 = '1' + str(self.rooster[r-1][c]) + str(self.rooster[r-1][(c+1)])
+                res2 = '1' + str(self.rooster[r][c]) + str(self.rooster[r][(c+1)])
+                res3 = '1' + str(self.rooster[(r+1)%self.omvang][c]) + str(self.rooster[(r+1)][(c+1)])
+            elif c == self.omvang - 1:
+                res1 = str(self.rooster[r-1][c-1]) + str(self.rooster[r-1][c]) + '1'
+                res2 = str(self.rooster[r][c-1]) + str(self.rooster[r][c]) + '1'
+                res3 = str(self.rooster[(r+1)][c-1]) + str(self.rooster[(r+1)][c]) + '1'
+            else:
+                res1 = str(self.rooster[r-1][c-1]) + str(self.rooster[r-1][c]) + str(self.rooster[r-1][(c+1)])
+                res2 = str(self.rooster[r][c-1]) + str(self.rooster[r][c]) + str(self.rooster[r][(c+1)])
+                res3 = str(self.rooster[(r+1)][c-1]) + str(self.rooster[(r+1)][c]) + str(self.rooster[(r+1)][(c+1)])
+        return res1 + res2 + res3 
         
     def update_bord(self):
         nieuw_rooster = []
@@ -206,11 +305,11 @@ def main():
     #hoofdfunctie waarin het programma aangestuurd kan worden
     regelnummer_gameoflife = 56893936281229891685721266345642969019123084627443426808421779969651967409186101770533392600047921391326336606991482847057223097055804786096169470132224
 
-    gol = tweedimensionale_CA(2,20,2,0,regelnummer_gameoflife)
-    tweedimensionale_CA.visualisatie_bord(gol, 300, 300, True)
+    gol = tweedimensionale_CA(2,50,2,'Dirichlet1',regelnummer_gameoflife)
+    tweedimensionale_CA.visualisatie_bord(gol, 600, 600, True)
     
-    '''r30 = eendimensionale_CA(1, 15, 2, 0, 30)
-    eendimensionale_CA.visualisatie_bord(r30, 900, 900, True)'''
+    r30 = eendimensionale_CA(1, 15, 2, 'periodiek', 30)
+    eendimensionale_CA.visualisatie_bord(r30, 400, 400, True)
     
 if __name__ == '__main__':
     main()
