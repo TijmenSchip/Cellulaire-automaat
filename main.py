@@ -27,6 +27,10 @@ class Automaat:
     
 
 class eendimensionale_CA(Automaat):
+    def __init__(self, dimensies, omvang, toestanden, randvoorwaarden,regelnummer):
+        super().__init__(dimensies, omvang, toestanden, randvoorwaarden,regelnummer)
+        self.regels = eendimensionale_CA.regels(self,self.regelnummer)
+    
     def regels(self,regelnummer):
         binair = [int(i) for i in format(regelnummer, 'b').zfill(8)]
         res = {"111": binair[0], "110": binair[1],
@@ -44,10 +48,9 @@ class eendimensionale_CA(Automaat):
         
     def update_bord(self):
         nieuw_rooster = [0 for i in range(self.omvang)]
-        regels = eendimensionale_CA.regels(self,self.regelnummer)
         for i in range(self.omvang):
             omgeving = eendimensionale_CA.krijg_omgeving(self,i)
-            nieuw_rooster[i] = regels[omgeving]
+            nieuw_rooster[i] = self.regels[omgeving]
         self.rooster = nieuw_rooster
 
 #Eendimensionaal test
@@ -60,6 +63,10 @@ while True:
 #%%
 
 class tweedimensionale_CA(Automaat):
+    def __init__(self, dimensies, omvang, toestanden, randvoorwaarden,regelnummer):
+        super().__init__(dimensies, omvang, toestanden, randvoorwaarden,regelnummer)
+        self.regels = tweedimensionale_CA.regels(self,self.regelnummer)
+        
     def regels(self,regelnummer):
         binair = [int(i) for i in format(regelnummer, 'b').zfill(512)]
         #Een functie die voor i in range(512) string aanmaakt met binair[i]
@@ -81,11 +88,10 @@ class tweedimensionale_CA(Automaat):
         nieuw_rooster = []
         for i in range(self.omvang):
             nieuw_rooster.append([0 for j in range(self.omvang)])
-        regels = tweedimensionale_CA.regels(self,self.regelnummer) #regels moeten eigenlijk in de init al gedaan worden
         for rij in range(self.omvang):
             for kolom in range(self.omvang):
                 omgeving = tweedimensionale_CA.krijg_omgeving(self,rij,kolom)
-                nieuw_rooster[rij][kolom] = regels[omgeving]
+                nieuw_rooster[rij][kolom] = self.regels[omgeving]
         self.rooster = nieuw_rooster
         return self.rooster
     
@@ -97,7 +103,7 @@ class tweedimensionale_CA(Automaat):
 
 
 #Tweedimensionale test
-a_100 = tweedimensionale_CA(2,10,2,0,23817414742626018756600486942041235944144477821162764131455443818923637186490860267185008884171498018109746158430352200636825527314111804480)
+a_100 = tweedimensionale_CA(2,10,2,0,56893936281229891685721266345642969019123084627443426808421779969651967409186101770533392600047921391326336606991482847057223097055804786096169470132224)
 a_100.rooster = [[0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
                  [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
                  [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
