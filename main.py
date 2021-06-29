@@ -24,7 +24,6 @@ class Automaat:
     def toestanden(self, toestanden): #toestand van een cel, m mogelijkheden
         return [i for i in range(toestanden)]
     
-
 class eendimensionale_CA(Automaat):
     def __init__(self, dimensies, omvang, toestanden, randvoorwaarden, regelnummer):
         super().__init__(dimensies, omvang, toestanden, randvoorwaarden, regelnummer)
@@ -53,20 +52,20 @@ class eendimensionale_CA(Automaat):
         self.rooster = nieuw_rooster
 
     def random_rooster(self):
-        #initialiseert een random rooster met nullen en enen
+        #initialiseert een random rooster gevuld met integers 0 en 1
         rooster = []
         for cel in range(self.omvang):
             rooster.append(random.randint(0,1))
         self.rooster = rooster
         
     def visualisatie_cel(x_positie, y_positie, kleur_levende_cel, cel_breedte, cel_hoogte):
-        #tekent een cel op x_positie, y_positie met kleur kleur_levende_cel
+        #tekent een cel op (x_positie, y_positie) in het scherm met kleur kleur_levende_cel
         x_positie *= cel_breedte
         y_positie *= cel_hoogte
         pygame.draw.ellipse(scherm, kleur_levende_cel, (x_positie, y_positie, cel_breedte, cel_hoogte))
 
     def visualisatie_bord(self, breedte_scherm, hoogte_scherm, disco = False):
-        #gebruikt pygame om het tweedimensionale CA te visualiseren
+        #gebruikt pygame om een eendimensionaal CA te visualiseren
         scherm_settings(breedte_scherm, hoogte_scherm)
         kleur_levende_cel = pygame.Color(200,0,0)
         kleur_dode_cel = (0,0,0)
@@ -85,6 +84,7 @@ class eendimensionale_CA(Automaat):
                         pygame.quit()
                         sys.exit()
                 
+                #tekent alle cellen in een rij
                 for cel_index in range(self.omvang):
                     cel_waarde = self.rooster[cel_index]
                     if cel_waarde == 1:
@@ -93,6 +93,7 @@ class eendimensionale_CA(Automaat):
                         cel_kleur = kleur_dode_cel
                     eendimensionale_CA.visualisatie_cel(cel_index, rij, cel_kleur, cel_breedte, cel_hoogte)
                 
+                #geeft de mogelijkheid om de kleuren van de levende cellen periodiek te veranderen
                 if disco == True:
                     kleursprong = (kleursprong + 10) % 360
                     kleur_levende_cel.hsva = [kleursprong, 100, 100]
@@ -136,7 +137,7 @@ class tweedimensionale_CA(Automaat):
         self.rooster = nieuw_rooster
     
     def random_rooster(self):
-        #initialiseert een random rooster van lengte en breedte omvang met nullen en enen
+        #initialiseert een random rooster van lengte omvang en breedte omvang gevuld met integers 0 en 1
         rooster = []
         for rij in range(self.omvang):
             lijst = []
@@ -152,13 +153,13 @@ class tweedimensionale_CA(Automaat):
         return res
     
     def visualisatie_cel(x_positie, y_positie, kleur_levende_cel, cel_breedte, cel_hoogte):
-        #tekent een cel op x_positie, y_positie met kleur kleur_levende_cel
+        #tekent een cel op (x_positie, y_positie) in het scherm met kleur kleur_levende_cel
         x_positie *= cel_breedte
         y_positie *= cel_hoogte
         pygame.draw.ellipse(scherm, kleur_levende_cel, (x_positie, y_positie, cel_breedte, cel_hoogte))
     
     def visualisatie_bord(self, breedte_scherm, hoogte_scherm, disco = False):
-        #gebruikt pygame om het tweedimensionale CA te visualiseren
+        #gebruikt pygame om een tweedimensionaal CA te visualiseren
         scherm_settings(breedte_scherm, hoogte_scherm)
         kleur_levende_cel = pygame.Color(200,0,0)
         kleur_dode_cel = (0,0,0)
@@ -185,6 +186,7 @@ class tweedimensionale_CA(Automaat):
                         cel_kleur = kleur_dode_cel
                     tweedimensionale_CA.visualisatie_cel(rij, kolom, cel_kleur, cel_breedte, cel_hoogte)
             
+            #geeft de mogelijkheid om de kleuren van de levende cellen periodiek te veranderen
             if disco == True:
                 kleursprong = (kleursprong + 2) % 360
                 kleur_levende_cel.hsva = [kleursprong, 100, 100]
@@ -196,16 +198,16 @@ class tweedimensionale_CA(Automaat):
                          
 def scherm_settings(breedte_scherm, hoogte_scherm):
     #initialiseert pygame scherm
-    #parameters van scherm zijn: ((breedte, lengte), type scherm, aantal bits voor kleuren)
+    #parameters van scherm zijn: ((breedte, hoogte), type scherm, aantal bits voor kleuren)
     global scherm
     scherm = pygame.display.set_mode((breedte_scherm, hoogte_scherm), 0, 24) 
 
-
 def main():
+    #hoofdfunctie waarin het programma aangestuurd kan worden
     regelnummer_gameoflife = 56893936281229891685721266345642969019123084627443426808421779969651967409186101770533392600047921391326336606991482847057223097055804786096169470132224
 
-    gol = tweedimensionale_CA(2,50,2,0,regelnummer_gameoflife)
-    tweedimensionale_CA.visualisatie_bord(gol, 900, 900, True)
+    gol = tweedimensionale_CA(2,20,2,0,regelnummer_gameoflife)
+    tweedimensionale_CA.visualisatie_bord(gol, 300, 300, True)
     
     '''r30 = eendimensionale_CA(1, 15, 2, 0, 30)
     eendimensionale_CA.visualisatie_bord(r30, 900, 900, True)'''
