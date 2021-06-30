@@ -85,8 +85,12 @@ class eendimensionale_CA(Automaat):
             else:
                 print("De gegeven omvang was niet gelijk aan de lengte van de startpositie")
         elif startpositie == "midden":
-            self.omvang = 15
-            self.rooster = [0,0,0,0,0,0,0,1,0,0,0,0,0,0,0]
+            self.omvang = 81
+            self.rooster = [1]
+            for i in range(40):
+                self.rooster.insert(0,0)    
+                self.rooster.append(0)
+  
         elif startpositie == "wisselend":
             self.omvang = 15
             self.rooster = [1,0,1,0,1,0,1,0,1,0,1,0,1,0,1]
@@ -447,11 +451,11 @@ def main():
     #hoofdfunctie waarin het programma aangestuurd kan worden
     regelnummer_gameoflife = 56893936281229891685721266345642969019123084627443426808421779969651967409186101770533392600047921391326336606991482847057223097055804786096169470132224
 
-    #gol = tweedimensionale_CA(2,50,2,'periodiek',regelnummer_gameoflife)
-    #tweedimensionale_CA.visualisatie_bord(gol, 600, 600, 0.3, True)
+    #gol = tweedimensionale_CA(2,50,2,'Dirichlet1',regelnummer_gameoflife)
+    #tweedimensionale_CA.visualisatie_bord(gol, 600, 600, 0.5, True, "glider")
     
-    r30 = eendimensionale_CA(1, 25, 2, 'periodiek', 30)
-    eendimensionale_CA.visualisatie_bord(r30, 400, 400, 0.5, True, "wisselend")
+    r30 = eendimensionale_CA(1, 25, 2, 'periodiek', 126)
+    eendimensionale_CA.visualisatie_bord(r30, 900, 900, 0.5, True, "midden")
     
 if __name__ == '__main__':
     main()
