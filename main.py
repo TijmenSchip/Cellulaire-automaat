@@ -513,7 +513,7 @@ def scherm_settings(breedte_scherm, hoogte_scherm):
     output: een scherm met breedte breedte_scherm, hoogte hoogte_scherm'''
     
     global scherm
-    scherm = pygame.display.set_mode((breedte_scherm, hoogte_scherm), 0, 24) 
+    scherm = pygame.display.set_mode((breedte_scherm, hoogte_scherm)) 
 
 def main():
     '''de main functie waarmee het programma dient aangestuurd te worden'''
