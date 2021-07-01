@@ -2,36 +2,48 @@ import numpy as np
 import pygame, random, sys, time
 
 class Automaat:
-    '''Een cellulaire automaat met rooster n
-    een cel heeft m toestanden
-    alle cellen in het rooster hebben dezelfde regels '''  
-    
-    '''Te doen: cellen maken, regels maken'''
+    '''De klasse voor de cellulaire automaat met een rooster van willekeurige omvang,
+    dimensie, toestanden en regelnummer. Ook keuze uit verschillende randvoorwaarden.'''  
     
     def __init__(self, dimensies, omvang, toestanden, randvoorwaarde, regelnummer):
+        '''Input: 'dimensies (int), omvang (int), toestanden (int), 
+        randvoorwaarde (periodiek, ...), regelnummer (int). 
+        Output: de zes algemene attributes die horen bij de cellulaire automaat
+        met de gegeven inputs.'''
+        
         self.omvang = omvang
-        self.rooster = Automaat.rooster(self,dimensies,omvang)
-        self.toestanden = Automaat.toestanden(self,toestanden)
+        self.dimensies = dimensies
+        self.rooster = Automaat.rooster(self)
+        self.toestanden = [i for i in range(toestanden)]
         self.regelnummer = regelnummer
         self.randvoorwaarde = randvoorwaarde
     
-    def rooster(self, dimensies, omvang): 
-        '''maakt een rooster van lengte n in een gespecificeerde dimensie'''
-        vorm = tuple(omvang for i in range(dimensies))
-        #hier misschien nog een functie die de grid willekeurig vult met
-        #nullen en enen, of om een input vraagt vanuit de user
+    def rooster(self): 
+        '''Input: self.
+        Output: een rooster met omvang**dimensies cellen.'''
+        
+        vorm = tuple(self.omvang for i in range(self.dimensies))
         return np.zeros(vorm,dtype=int)
     
-    def toestanden(self, toestanden): #toestand van een cel, m mogelijkheden
-        return [i for i in range(toestanden)]
-    
 class eendimensionale_CA(Automaat):
-    def __init__(self, dimensies, omvang, toestanden, randvoorwaarden, regelnummer):
-        super().__init__(dimensies, omvang, toestanden, randvoorwaarden, regelnummer)
-        self.regels = eendimensionale_CA.regels(self,self.regelnummer)
+    '''De klasse voor de eendimensionale automaat met functies: regels, krijg_omgeving,
+    update_bord, random_rooster, startposities, __str__, visualisatie_cel en 
+    visualistatie_bord. Deze functies zijn speciaal geschreven voor dimensie = 1.'''
     
-    def regels(self,regelnummer):
-        binair = [int(i) for i in format(regelnummer, 'b').zfill(8)]
+    def __init__(self, dimensies, omvang, toestanden, randvoorwaarden, regelnummer):
+        '''Input: 'dimensies (int), omvang (int), toestanden (int), 
+        randvoorwaarde (periodiek, ...), regelnummer (int).
+        Output: de zes algemene attributes (inherited) plus de attribute regels (dict)
+        voor het gekozen regelnummer.'''
+        
+        super().__init__(dimensies, omvang, toestanden, randvoorwaarden, regelnummer)
+        self.regels = eendimensionale_CA.regels(self)
+    
+    def regels(self):
+        '''Input: self.
+        Output: de regels behorend bij het regelnummer'''
+        
+        binair = [int(i) for i in format(self.regelnummer, 'b').zfill(8)] #regelnummer omzetten in bits
         res = {"111": binair[0], "110": binair[1],
                "101": binair[2], "100": binair[3],
                "011": binair[4], "010": binair[5],
@@ -39,52 +51,66 @@ class eendimensionale_CA(Automaat):
         return res
     
     def krijg_omgeving(self, i):
+        '''Input:self, index van een cel in het rooster (int).
+        Output: de cel plus de omgeving van de cel, afhankelijk van de gekozen randvoorwaarde (str).'''
+        
         if self.randvoorwaarde == 'periodiek':
             res = str(self.rooster[i-1]) + str(self.rooster[i]) + str(self.rooster[(i+1)%self.omvang])
         if self.randvoorwaarde == 'Dirichlet0':
             if i == 0:
-                res = '0' + str(self.rooster[i]) + str(self.rooster[(i+1)%self.omvang])
+                res = '0' + str(self.rooster[i]) + str(self.rooster[i+1])
             elif i == self.omvang - 1:
                 res = str(self.rooster[i-1]) + str(self.rooster[i]) + '0'
             else:
-                res = str(self.rooster[i-1]) + str(self.rooster[i]) + str(self.rooster[(i+1)%self.omvang])
+                res = str(self.rooster[i-1]) + str(self.rooster[i]) + str(self.rooster[i+1])
         if self.randvoorwaarde == 'Dirichlet1':
             if i == 0:
-                res = '1' + str(self.rooster[i]) + str(self.rooster[(i+1)%self.omvang])
+                res = '1' + str(self.rooster[i]) + str(self.rooster[i+1])
             elif i == self.omvang - 1:
                 res = str(self.rooster[i-1]) + str(self.rooster[i]) + '1'
             else:
-                res = str(self.rooster[i-1]) + str(self.rooster[i]) + str(self.rooster[(i+1)%self.omvang])
+                res = str(self.rooster[i-1]) + str(self.rooster[i]) + str(self.rooster[i+1])
         if self.randvoorwaarde == 'Neumann':
             if i == 0:
-                res = str(self.rooster[i]) + str(self.rooster[i]) + str(self.rooster[(i+1)%self.omvang])
+                res = str(self.rooster[i]) + str(self.rooster[i]) + str(self.rooster[i+1])
             elif i == self.omvang - 1:
-                res = str(self.rooster[i-1]) + str(self.rooster[i]) + str(self.rooster[(i+1)%self.omvang])
+                res = str(self.rooster[i-1]) + str(self.rooster[i]) + str(self.rooster[i])
             else:
-                res = str(self.rooster[i-1]) + str(self.rooster[i]) + str(self.rooster[(i+1)%self.omvang])
+                res = str(self.rooster[i-1]) + str(self.rooster[i]) + str(self.rooster[i+1])
         return res #periodiek
         
     def update_bord(self):
-        nieuw_rooster = [0 for i in range(self.omvang)]
+        '''Input: self.
+        Output: void, past de regels toe op iedere cel en geeft zo een nieuw rooster.'''
+        
+        nieuw_rooster = [0 for i in range(self.omvang)] #maak een leeg rooster
+        
         for i in range(self.omvang):
-            omgeving = eendimensionale_CA.krijg_omgeving(self,i)
-            nieuw_rooster[i] = self.regels[omgeving]
+            omgeving = self.krijg_omgeving(i) 
+            nieuw_rooster[i] = self.regels[omgeving] #pas regel toe op omgeving
         self.rooster = nieuw_rooster
 
     def random_rooster(self):
-        #initialiseert een random rooster gevuld met integers 0 en 1
+        '''Input: self.
+        Output: void, initialiseert een random rooster gevuld met integers 0 en 1'''
+        
         rooster = []
         for cel in range(self.omvang):
             rooster.append(random.randint(0,1))
         self.rooster = rooster
     
     def startposities(self, startpositie):
-        if isinstance(startpositie, list):
+        '''input: self, startpositie
+        Output: void, initialiseert het beginrooster.'''
+        
+        if isinstance(startpositie, list): #door gebruiker gekozen startpositie
             if self.omvang == len(startpositie):
+                print('Uw zelfgekozen rooster!')
                 self.rooster = startpositie
             else:
                 print("De gegeven omvang was niet gelijk aan de lengte van de startpositie")
         elif startpositie == "midden":
+            print('Een middenrooster!')
             self.omvang = 81
             self.rooster = [1]
             for i in range(40):
@@ -92,16 +118,19 @@ class eendimensionale_CA(Automaat):
                 self.rooster.append(0)
   
         elif startpositie == "wisselend":
-            self.omvang = 15
-            self.rooster = [1,0,1,0,1,0,1,0,1,0,1,0,1,0,1]
+            print('Een wisselend rooster!')
+            self.omvang = 50
+            self.rooster = [1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0]
         else:
-            eendimensionale_CA.random_rooster(self)
+            print('Een willekeurig rooster!')
+            self.random_rooster()
     
     def __str__(self):
-        resultaat = ''
-        for element in self.rooster:
-            resultaat += str(element)
-        return resultaat
+        '''Input: self.
+        Output: een string bestaande uit de cellen van het rooster (str).'''
+        
+        res = ''.join(map(str,self.rooster)) #converteert lijst naar string
+        return res
     
     def visualisatie_cel(x_positie, y_positie, kleur_levende_cel, cel_breedte, cel_hoogte):
         #tekent een cel op (x_positie, y_positie) in het scherm met kleur kleur_levende_cel
@@ -122,9 +151,10 @@ class eendimensionale_CA(Automaat):
         
         cel_breedte = breedte_scherm // self.omvang
         cel_hoogte = hoogte_scherm // self.omvang
-        
+
         while True:
             #tekent alle cellen op het scherm
+            
             for rij in range(hoogte_scherm // cel_hoogte):
                 # Sluit scherm als gebruiker op kruisje klikt
                 for event in pygame.event.get():
@@ -149,122 +179,140 @@ class eendimensionale_CA(Automaat):
                 #update scherm en rooster
                 pygame.display.flip()
                 eendimensionale_CA.update_bord(self)
-                
+
                 time.sleep(pauzetijd)
             
 class tweedimensionale_CA(Automaat):
+    '''De klasse voor de tweedimensionale automaat met functies: regels, krijg_omgeving,
+    update_bord, random_rooster, startposities, __str__, visualisatie_cel en 
+    visualistatie_bord. Deze functies zijn speciaal geschreven voor dimensie = 2.'''
+    
     def __init__(self, dimensies, omvang, toestanden, randvoorwaarden,regelnummer):
+        '''Input: 'dimensies (int), omvang (int), toestanden (int), 
+        randvoorwaarde (periodiek, ...), regelnummer (int).
+        Output: de zes algemene attributes (inherited) plus de attribute regels (dict)
+        voor het gekozen regelnummer.'''
+        
         super().__init__(dimensies, omvang, toestanden, randvoorwaarden,regelnummer)
         self.regels = tweedimensionale_CA.regels(self,self.regelnummer)
         
     def regels(self,regelnummer):
-        binair = [int(i) for i in format(regelnummer, 'b').zfill(512)]
-        #Een functie die voor i in range(512) string aanmaakt met binair[i]
+        '''Input: self.
+        Output: de regels behorend bij het regelnummer'''
+        
+        binair = [int(i) for i in format(regelnummer, 'b').zfill(512)] #regelnummer omzetten in bits
         res = {}
-        for i in reversed(range(512)):
-            res[format(i, 'b').zfill(9)] = binair[i]
+        for i in reversed(range(512)): #itereren over alle mogelijke omgevingen
+            res[format(i, 'b').zfill(9)] = binair[i] #regel toevoegen voor omgeving
         return res
     
-    def randvoorwaarden(self):
-        return 0
-    
     def krijg_omgeving(self, r, c):
+        '''Input:self, rij en kolom van een cel in het rooster (int).
+        Output: de cel plus de omgeving van de cel, afhankelijk van de gekozen randvoorwaarde (str).'''
+        
         if self.randvoorwaarde == 'periodiek':
             res1 = str(self.rooster[r-1][c-1]) + str(self.rooster[r-1][c]) + str(self.rooster[r-1][(c+1)%self.omvang])
             res2 = str(self.rooster[r][c-1]) + str(self.rooster[r][c]) + str(self.rooster[r][(c+1)%self.omvang])
             res3 = str(self.rooster[(r+1)%self.omvang][c-1]) + str(self.rooster[(r+1)%self.omvang][c]) + str(self.rooster[(r+1)%self.omvang][(c+1)%self.omvang])
         if self.randvoorwaarde == 'Dirichlet0':
+            #onderscheid tussen 9 verschillende gevallen
             if r == 0:
-                if c == 0:
+                if c == 0: #hoekpunt linksboven
                     res1 = '000'
-                    res2 = '0' + str(self.rooster[r][c]) + str(self.rooster[r][(c+1)])
-                    res3 = '0' + str(self.rooster[(r+1)][c]) + str(self.rooster[(r+1)][(c+1)])
-                elif c == self.omvang - 1:
+                    res2 = '0' + str(self.rooster[r][c]) + str(self.rooster[r][c+1])
+                    res3 = '0' + str(self.rooster[r+1][c]) + str(self.rooster[r+1][c+1])
+                elif c == self.omvang - 1: #hoekpunt rechtsboven
                     res1 = '000'
                     res2 = str(self.rooster[r][c-1]) + str(self.rooster[r][c]) + '0'
                     res3 = str(self.rooster[(r+1)][c-1]) + str(self.rooster[(r+1)][c]) + '0'
-                else:
+                else: #bovenste rij
                     res1 = '000'
                     res2 = str(self.rooster[r][c-1]) + str(self.rooster[r][c]) + str(self.rooster[r][(c+1)])
                     res3 = str(self.rooster[(r+1)][c-1]) + str(self.rooster[(r+1)][c]) + str(self.rooster[(r+1)][(c+1)])
             elif r == self.omvang - 1:
-                if c == 0:
-                    res1 =  '0' + str(self.rooster[r-1][c]) + str(self.rooster[r-1][(c+1)])
-                    res2 = '0' + str(self.rooster[r][c]) + str(self.rooster[r][(c+1)])
+                if c == 0: #hoekpunt linksonder
+                    res1 =  '0' + str(self.rooster[r-1][c]) + str(self.rooster[r-1][c+1])
+                    res2 = '0' + str(self.rooster[r][c]) + str(self.rooster[r][c+1])
                     res3 = '000'
-                elif c == self.omvang -1:
+                elif c == self.omvang -1: #hoekpunt rechtsonder
                     res1 = str(self.rooster[r-1][c-1]) + str(self.rooster[r-1][c]) + '0'
                     res2 = str(self.rooster[r][c-1]) + str(self.rooster[r][c]) + '0'
                     res3 = '000'
-                else:
-                    res1 = str(self.rooster[r-1][c-1]) + str(self.rooster[r-1][c]) + str(self.rooster[r-1][(c+1)])
-                    res2 = str(self.rooster[r][c-1]) + str(self.rooster[r][c]) + str(self.rooster[r][(c+1)])
+                else: #onderste rij
+                    res1 = str(self.rooster[r-1][c-1]) + str(self.rooster[r-1][c]) + str(self.rooster[r-1][c+1])
+                    res2 = str(self.rooster[r][c-1]) + str(self.rooster[r][c]) + str(self.rooster[r][c+1])
                     res3 = '000'
-            elif c == 0:
-                res1 = '0' + str(self.rooster[r-1][c]) + str(self.rooster[r-1][(c+1)])
-                res2 = '0' + str(self.rooster[r][c]) + str(self.rooster[r][(c+1)])
-                res3 = '0' + str(self.rooster[(r+1)%self.omvang][c]) + str(self.rooster[(r+1)][(c+1)])
-            elif c == self.omvang - 1:
+            elif c == 0: #linkerkolom
+                res1 = '0' + str(self.rooster[r-1][c]) + str(self.rooster[r-1][c+1])
+                res2 = '0' + str(self.rooster[r][c]) + str(self.rooster[r][c+1])
+                res3 = '0' + str(self.rooster[r+1][c]) + str(self.rooster[r+1][c+1])
+            elif c == self.omvang - 1: #rechterkolom
                 res1 = str(self.rooster[r-1][c-1]) + str(self.rooster[r-1][c]) + '0'
                 res2 = str(self.rooster[r][c-1]) + str(self.rooster[r][c]) + '0'
-                res3 = str(self.rooster[(r+1)][c-1]) + str(self.rooster[(r+1)][c]) + '0'
-            else:
-                res1 = str(self.rooster[r-1][c-1]) + str(self.rooster[r-1][c]) + str(self.rooster[r-1][(c+1)])
-                res2 = str(self.rooster[r][c-1]) + str(self.rooster[r][c]) + str(self.rooster[r][(c+1)])
-                res3 = str(self.rooster[(r+1)][c-1]) + str(self.rooster[(r+1)][c]) + str(self.rooster[(r+1)][(c+1)])
+                res3 = str(self.rooster[r+1][c-1]) + str(self.rooster[r+1][c]) + '0'
+            else: #niet-randposities
+                res1 = str(self.rooster[r-1][c-1]) + str(self.rooster[r-1][c]) + str(self.rooster[r-1][c+1])
+                res2 = str(self.rooster[r][c-1]) + str(self.rooster[r][c]) + str(self.rooster[r][c+1])
+                res3 = str(self.rooster[r+1][c-1]) + str(self.rooster[r+1][c]) + str(self.rooster[r+1][c+1])
         if self.randvoorwaarde == 'Dirichlet1':
             if r == 0:
-                if c == 0:
+                if c == 0: #hoekpunt linksboven
                     res1 = '111'
-                    res2 = '1' + str(self.rooster[r][c]) + str(self.rooster[r][(c+1)])
-                    res3 = '1' + str(self.rooster[(r+1)][c]) + str(self.rooster[(r+1)][(c+1)])
-                elif c == self.omvang - 1:
+                    res2 = '1' + str(self.rooster[r][c]) + str(self.rooster[r][c+1])
+                    res3 = '1' + str(self.rooster[r+1][c]) + str(self.rooster[r+1][c+1])
+                elif c == self.omvang - 1: #hoekpunt rechtsboven
                     res1 = '111'
                     res2 = str(self.rooster[r][c-1]) + str(self.rooster[r][c]) + '1'
                     res3 = str(self.rooster[(r+1)][c-1]) + str(self.rooster[(r+1)][c]) + '1'
-                else:
+                else: #bovenste rij
                     res1 = '111'
                     res2 = str(self.rooster[r][c-1]) + str(self.rooster[r][c]) + str(self.rooster[r][(c+1)])
                     res3 = str(self.rooster[(r+1)][c-1]) + str(self.rooster[(r+1)][c]) + str(self.rooster[(r+1)][(c+1)])
             elif r == self.omvang - 1:
-                if c == 0:
-                    res1 = '1' + str(self.rooster[r-1][c]) + str(self.rooster[r-1][(c+1)])
-                    res2 = '1' + str(self.rooster[r][c]) + str(self.rooster[r][(c+1)])
+                if c == 0: #hoekpunt linksonder
+                    res1 =  '1' + str(self.rooster[r-1][c]) + str(self.rooster[r-1][c+1])
+                    res2 = '1' + str(self.rooster[r][c]) + str(self.rooster[r][c+1])
                     res3 = '111'
-                elif c == self.omvang -1:
+                elif c == self.omvang -1: #hoekpunt rechtsonder
                     res1 = str(self.rooster[r-1][c-1]) + str(self.rooster[r-1][c]) + '1'
                     res2 = str(self.rooster[r][c-1]) + str(self.rooster[r][c]) + '1'
                     res3 = '111'
-                else:
-                    res1 = str(self.rooster[r-1][c-1]) + str(self.rooster[r-1][c]) + str(self.rooster[r-1][(c+1)])
-                    res2 = str(self.rooster[r][c-1]) + str(self.rooster[r][c]) + str(self.rooster[r][(c+1)])
+                else: #onderste rij
+                    res1 = str(self.rooster[r-1][c-1]) + str(self.rooster[r-1][c]) + str(self.rooster[r-1][c+1])
+                    res2 = str(self.rooster[r][c-1]) + str(self.rooster[r][c]) + str(self.rooster[r][c+1])
                     res3 = '111'
-            elif c == 0:
-                res1 = '1' + str(self.rooster[r-1][c]) + str(self.rooster[r-1][(c+1)])
-                res2 = '1' + str(self.rooster[r][c]) + str(self.rooster[r][(c+1)])
-                res3 = '1' + str(self.rooster[(r+1)%self.omvang][c]) + str(self.rooster[(r+1)][(c+1)])
-            elif c == self.omvang - 1:
+            elif c == 0: #linkerkolom
+                res1 = '1' + str(self.rooster[r-1][c]) + str(self.rooster[r-1][c+1])
+                res2 = '1' + str(self.rooster[r][c]) + str(self.rooster[r][c+1])
+                res3 = '1' + str(self.rooster[r+1][c]) + str(self.rooster[r+1][c+1])
+            elif c == self.omvang - 1: #rechterkolom
                 res1 = str(self.rooster[r-1][c-1]) + str(self.rooster[r-1][c]) + '1'
                 res2 = str(self.rooster[r][c-1]) + str(self.rooster[r][c]) + '1'
-                res3 = str(self.rooster[(r+1)][c-1]) + str(self.rooster[(r+1)][c]) + '1'
-            else:
-                res1 = str(self.rooster[r-1][c-1]) + str(self.rooster[r-1][c]) + str(self.rooster[r-1][(c+1)])
-                res2 = str(self.rooster[r][c-1]) + str(self.rooster[r][c]) + str(self.rooster[r][(c+1)])
-                res3 = str(self.rooster[(r+1)][c-1]) + str(self.rooster[(r+1)][c]) + str(self.rooster[(r+1)][(c+1)])
+                res3 = str(self.rooster[r+1][c-1]) + str(self.rooster[r+1][c]) + '1'
+            else: #niet-randposities
+                res1 = str(self.rooster[r-1][c-1]) + str(self.rooster[r-1][c]) + str(self.rooster[r-1][c+1])
+                res2 = str(self.rooster[r][c-1]) + str(self.rooster[r][c]) + str(self.rooster[r][c+1])
+                res3 = str(self.rooster[r+1][c-1]) + str(self.rooster[r+1][c]) + str(self.rooster[r+1][c+1])
         return res1 + res2 + res3 
         
     def update_bord(self):
-        nieuw_rooster = []
+        '''Input: self.
+        Output: void, past de regels toe op iedere cel en geeft zo een nieuw rooster.'''
+
+        nieuw_rooster = [] #maak een leeg rooster
         for i in range(self.omvang):
             nieuw_rooster.append([0 for j in range(self.omvang)])
+            
         for rij in range(self.omvang):
             for kolom in range(self.omvang):
-                omgeving = tweedimensionale_CA.krijg_omgeving(self,rij,kolom)
-                nieuw_rooster[rij][kolom] = self.regels[omgeving]
+                omgeving = self.krijg_omgeving(rij,kolom)
+                nieuw_rooster[rij][kolom] = self.regels[omgeving] #pas regel toe op omgeving
         self.rooster = nieuw_rooster
     
     def random_rooster(self):
-        #initialiseert een random rooster van lengte omvang en breedte omvang gevuld met integers 0 en 1
+        '''Input: self.
+        Output: void, initialiseert een random rooster gevuld met integers 0 en 1'''
+        
         rooster = []
         for rij in range(self.omvang):
             lijst = []
@@ -292,6 +340,7 @@ class tweedimensionale_CA(Automaat):
                 print("Het gegeven rooster was niet vierkant of de omvang was niet gelijk aan het aantal rijen en kolommen")
         
         elif startpositie == "glider":
+            print('De glider!')
             self.omvang = 10
             self.rooster = [[0,0,0,0,0,0,0,0,0,0],
                             [0,0,0,0,0,0,0,0,0,0],
@@ -304,6 +353,7 @@ class tweedimensionale_CA(Automaat):
                             [0,0,0,0,0,0,0,0,0,0],
                             [0,0,0,0,0,0,0,0,0,0]]            
         elif startpositie == "glidergun":
+            print('De glidergun, erg veel gliders!')
             self.omvang = 50
             self.rooster = [[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
                             [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
@@ -318,6 +368,7 @@ class tweedimensionale_CA(Automaat):
             for i in range(40):
                 self.rooster.append([0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0])
         elif startpositie == "pulsar":
+            print('De pulsar!')
             self.omvang = 17
             self.rooster = [[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
                             [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
@@ -337,6 +388,7 @@ class tweedimensionale_CA(Automaat):
                             [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
                             [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]]  
         elif startpositie == "puffer":
+            print('Een puffer, erg veel vierkantjes!')
             self.omvang = 300
             self.rooster = [[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
                             [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
@@ -373,6 +425,7 @@ class tweedimensionale_CA(Automaat):
             for i in range(135):
                 self.rooster.append([0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0])
         elif startpositie == "spaceship":
+            print('Een spaceship!')
             self.omvang = 20
             self.rooster = [[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
                             [0,0,0,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0],
@@ -385,13 +438,17 @@ class tweedimensionale_CA(Automaat):
             for i in range(7):
                 self.rooster.append([0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0])    
         else:
+            print('Een willekeurig rooster!')
             tweedimensionale_CA.random_rooster(self)
                                
-    def __str__(self): #kan nog wat mooier
-        resultaat = ''
+    def __str__(self):
+        '''Input: self.
+        Output: een string bestaande uit de cellen van het rooster (str).'''
+        
+        res = ''
         for rij in range(self.omvang):
-            resultaat += ''.join(map(str,self.rooster[rij])) + '\n'
-        return resultaat
+            res += ''.join(map(str,self.rooster[rij])) + '\n' #lijst naar string + skip regel
+        return res
     
     def visualisatie_cel(x_positie, y_positie, kleur_levende_cel, cel_breedte, cel_hoogte):
         #tekent een cel op (x_positie, y_positie) in het scherm met kleur kleur_levende_cel
@@ -451,11 +508,11 @@ def main():
     #hoofdfunctie waarin het programma aangestuurd kan worden
     regelnummer_gameoflife = 56893936281229891685721266345642969019123084627443426808421779969651967409186101770533392600047921391326336606991482847057223097055804786096169470132224
 
-    #gol = tweedimensionale_CA(2,50,2,'Dirichlet1',regelnummer_gameoflife)
-    #tweedimensionale_CA.visualisatie_bord(gol, 600, 600, 0.5, True, "glider")
+    #gol = tweedimensionale_CA(2,50,2,'periodiek',regelnummer_gameoflife)
+    #tweedimensionale_CA.visualisatie_bord(gol, 600, 600, 0.3, True, "glidergun")
     
-    r30 = eendimensionale_CA(1, 25, 2, 'periodiek', 126)
-    eendimensionale_CA.visualisatie_bord(r30, 900, 900, 0.5, True, "midden")
-    
+    lin = eendimensionale_CA(1, 40, 2, 'periodiek', 126)
+    eendimensionale_CA.visualisatie_bord(lin, 400, 400, 0.3, True)
+
 if __name__ == '__main__':
     main()
