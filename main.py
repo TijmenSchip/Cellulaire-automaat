@@ -103,7 +103,9 @@ class eendimensionale_CA(Automaat):
         '''input: self, startpositie
         Output: void, initialiseert het beginrooster.'''
         
-        if isinstance(startpositie, list): #door gebruiker gekozen startpositie
+        #probeert door gebruiker gekozen startpositie te gebruiken
+        #anders gebruikt een voorgeprogrammeerde startpositie of initialiseert een random rooster
+        if isinstance(startpositie, list): 
             if self.omvang == len(startpositie):
                 print('Uw zelfgekozen rooster!')
                 self.rooster = startpositie
@@ -112,11 +114,7 @@ class eendimensionale_CA(Automaat):
         elif startpositie == "midden":
             print('Een middenrooster!')
             self.omvang = 81
-            self.rooster = [1]
-            for i in range(40):
-                self.rooster.insert(0,0)    
-                self.rooster.append(0)
-  
+            self.rooster =[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
         elif startpositie == "wisselend":
             print('Een wisselend rooster!')
             self.omvang = 50
@@ -133,13 +131,19 @@ class eendimensionale_CA(Automaat):
         return res
     
     def visualisatie_cel(x_positie, y_positie, kleur_levende_cel, cel_breedte, cel_hoogte):
-        #tekent een cel op (x_positie, y_positie) in het scherm met kleur kleur_levende_cel
+        '''Input: x_posities, y_positie, kleur_levende_cel, cel_breedte, cel_hoogte.
+        Output: tekent een cel op (x_positie, y_positie) in het scherm met kleur kleur_levende_cel, breedte cel_breedte en hoogte cel_hoogte.'''
+        
         x_positie *= cel_breedte
         y_positie *= cel_hoogte
         pygame.draw.ellipse(scherm, kleur_levende_cel, (x_positie, y_positie, cel_breedte, cel_hoogte))
 
     def visualisatie_bord(self, breedte_scherm, hoogte_scherm, pauzetijd = 1, disco = False, startpositie = 'random'):
-        #gebruikt pygame om een eendimensionaal CA te visualiseren
+        '''Input: self, breedte_scherm, hoogte_scherm, pauzetijd, disco, startpositie.
+        Output: initialiseert een scherm met breedte breedte_scherm en hoogte hoogte_scherm
+                tekent op scherm self.rooster met startpositie startpositie en update self.rooster met pauzetijd pauzetijd
+                kleuren van de cellen veranderen periodiek als disco = True'''
+                
         scherm_settings(breedte_scherm, hoogte_scherm)
         kleur_levende_cel = pygame.Color(200,0,0)
         kleur_dode_cel = (0,0,0)
@@ -154,7 +158,6 @@ class eendimensionale_CA(Automaat):
 
         while True:
             #tekent alle cellen op het scherm
-            
             for rij in range(hoogte_scherm // cel_hoogte):
                 # Sluit scherm als gebruiker op kruisje klikt
                 for event in pygame.event.get():
@@ -322,9 +325,11 @@ class tweedimensionale_CA(Automaat):
         self.rooster = rooster
     
     def startposities(self, startpositie):
-        #als een rooster gegeven is in startpositie probeert het deze te gebruiken
-        #collectie van mogelijke 2 dimensionale startposities
-        #als startpositie niet in deze lijst staat geldt startpositie = 'random'
+        '''input: self, startpositie
+        Output: void, initialiseert het beginrooster.'''
+        
+        #probeert door gebruiker gekozen startpositie te gebruiken
+        #anders gebruikt een voorgeprogrammeerde startpositie of initialiseert een random rooster
         if isinstance(startpositie, list):
             isvierkant = True
             if self.omvang == len(startpositie):
@@ -338,7 +343,6 @@ class tweedimensionale_CA(Automaat):
                 self.rooster = startpositie
             else:
                 print("Het gegeven rooster was niet vierkant of de omvang was niet gelijk aan het aantal rijen en kolommen")
-        
         elif startpositie == "glider":
             print('De glider!')
             self.omvang = 10
@@ -451,13 +455,19 @@ class tweedimensionale_CA(Automaat):
         return res
     
     def visualisatie_cel(x_positie, y_positie, kleur_levende_cel, cel_breedte, cel_hoogte):
-        #tekent een cel op (x_positie, y_positie) in het scherm met kleur kleur_levende_cel
+        '''Input: x_posities, y_positie, kleur_levende_cel, cel_breedte, cel_hoogte.
+        Output: tekent een cel op (x_positie, y_positie) in het scherm met kleur kleur_levende_cel, breedte cel_breedte en hoogte cel_hoogte.'''
+        
         x_positie *= cel_breedte
         y_positie *= cel_hoogte
         pygame.draw.ellipse(scherm, kleur_levende_cel, (x_positie, y_positie, cel_breedte, cel_hoogte))
     
     def visualisatie_bord(self, breedte_scherm, hoogte_scherm, pauzetijd = 0.3, disco = False, startpositie = "random"):
-        #gebruikt pygame om een tweedimensionaal CA te visualiseren
+        '''Input: self, breedte_scherm, hoogte_scherm, pauzetijd, disco, startpositie.
+        Output: initialiseert een scherm met breedte breedte_scherm en hoogte hoogte_scherm
+        tekent op scherm self.rooster met startpositie startpositie en update self.rooster met pauzetijd pauzetijd
+        kleuren van de cellen veranderen periodiek als disco = True'''
+ 
         scherm_settings(breedte_scherm, hoogte_scherm)
         kleur_levende_cel = pygame.Color(200,0,0)
         kleur_dode_cel = (0,0,0)
@@ -468,8 +478,7 @@ class tweedimensionale_CA(Automaat):
         print(str(self))
         
         cel_breedte = breedte_scherm // self.omvang
-        cel_hoogte = hoogte_scherm // self.omvang
-        
+        cel_hoogte = hoogte_scherm // self.omvang  
         
         while True:
             # Sluit scherm als gebruiker op kruisje klikt
@@ -499,20 +508,23 @@ class tweedimensionale_CA(Automaat):
             time.sleep(pauzetijd)
                          
 def scherm_settings(breedte_scherm, hoogte_scherm):
-    #initialiseert pygame scherm
-    #parameters van scherm zijn: ((breedte, hoogte), type scherm, aantal bits voor kleuren)
+    '''initialiseert een pygame scherm
+    input: breedte_scherm, hoogte_scherm 
+    output: een scherm met breedte breedte_scherm, hoogte hoogte_scherm'''
+    
     global scherm
     scherm = pygame.display.set_mode((breedte_scherm, hoogte_scherm), 0, 24) 
 
 def main():
-    #hoofdfunctie waarin het programma aangestuurd kan worden
+    '''de main functie waarmee het programma dient aangestuurd te worden'''
+    
     regelnummer_gameoflife = 56893936281229891685721266345642969019123084627443426808421779969651967409186101770533392600047921391326336606991482847057223097055804786096169470132224
 
     #gol = tweedimensionale_CA(2,50,2,'periodiek',regelnummer_gameoflife)
     #tweedimensionale_CA.visualisatie_bord(gol, 600, 600, 0.3, True, "glidergun")
     
     lin = eendimensionale_CA(1, 40, 2, 'periodiek', 126)
-    eendimensionale_CA.visualisatie_bord(lin, 400, 400, 0.3, True)
+    eendimensionale_CA.visualisatie_bord(lin, 900, 900, 0.3, True, "midden")
 
 if __name__ == '__main__':
     main()
