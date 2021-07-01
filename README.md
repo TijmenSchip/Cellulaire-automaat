@@ -1,2 +1,7 @@
 # Cellulaire-automaat
-Eén of twee dimensionale cellulaire automaat in python.
+Gemaakt door Tijmen Schipper en Tim Grimbergen
+
+Packages gebruikt:
+
+
+
